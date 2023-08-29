@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.vm.AddProductVm;
+import com.btk.ordercorner.model.vm.UpdateProductStockVm;
 import com.btk.ordercorner.service.ProductService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,10 +20,11 @@ import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -188,6 +190,12 @@ public class ProductController {
     @GetMapping(value="/search/price/lowerThan/{productPrice}")
     public List<ProductDto> getProductsWhosePriceLower(@PathVariable("productPrice") double productPrice) {
         return productService.getProductsWhosePriceLower(productPrice);
+    }
+
+    @PutMapping(value = "/update/stock")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public String updateProductStock(@Valid @RequestBody UpdateProductStockVm productStockVm) {
+        return productService.updateProductStock(productStockVm);
     }
 
 }

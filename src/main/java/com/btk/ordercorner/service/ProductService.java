@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.vm.AddProductVm;
+import com.btk.ordercorner.model.vm.UpdateProductStockVm;
 
 public interface ProductService {
 
@@ -24,5 +25,7 @@ public interface ProductService {
     List<ProductDto> getProductsWhosePriceBigger(double productPrice);
 
     List<ProductDto> getProductsWhosePriceLower(double productPrice);
+
+    String updateProductStock(UpdateProductStockVm productStockVm);
 
 }

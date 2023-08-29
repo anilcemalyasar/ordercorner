@@ -24,9 +24,6 @@ public interface ShoppingCartRepository extends JpaRepository<ShoppingCart, Inte
     @Query(value = "select exists(select * from sepet_urunler su where su.cart_sepet_id = :cartId and su.product_urun_id in (:productId))", nativeQuery=true)
     boolean checkProductIfExists(@Param("productId") int productId, @Param("cartId") int cartId);
 
-    @Query(value = "select m.kullanici_adi from musteriler m where m.musteri_id = ?1", nativeQuery = true)
-    String getCustomerNameById(int customerId);
-
     @Query(value = "select exists(select * from sepetler s where s.aktif = true and s.fk_musteri_id = ?1)", nativeQuery = true)
     boolean hasCustomerAvailableCart(@Param("customerId") int customerId);
 

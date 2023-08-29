@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,7 @@ import com.btk.ordercorner.exception.product.ProductNotFoundException;
 import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.entity.Product;
 import com.btk.ordercorner.model.vm.AddProductVm;
+import com.btk.ordercorner.model.vm.UpdateProductStockVm;
 import com.btk.ordercorner.repository.CategoryRepository;
 import com.btk.ordercorner.repository.ProductRepository;
 import com.btk.ordercorner.service.ProductService;
@@ -129,6 +131,24 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = productRepository.findAll().stream().filter(product -> product.getProductPrice() < productPrice).toList();
         return products.stream()
             .map(product -> modelMapperManager.forResponse().map(product, ProductDto.class)).collect(Collectors.toList());
+    }
+
+
+    @CachePut(value = "products", key = "#productStockVm.productId")
+    @Override
+    public String updateProductStock(UpdateProductStockVm productStockVm) {
+        Authentication auth = getAuth();
+        Product product = productRepository.findById(productStockVm.getProductId()).get();
+        if(productStockVm.getStockAmount() > 10) {
+            logger.error("Bir ürünün stoğunu bir seferde en fazla 10 arttırabilirsiniz!");
+            throw new AccessDeniedException("Bir ürünün stoğunu bir seferde en fazla 10 arttırabilirsiniz!");
+        }
+        product.setStockAmount(product.getStockAmount() + productStockVm.getStockAmount());
+        String message = auth.getName() 
+        + " isimli admin " + product.getProductName() + " ürününün stoğunu " + product.getStockAmount() + " sayısına güncelledi!";
+        productRepository.save(product);
+        logger.info(message);
+        return message;
     }
 
 }

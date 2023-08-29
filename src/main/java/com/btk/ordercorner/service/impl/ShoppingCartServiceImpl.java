@@ -167,7 +167,7 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
     @Override
     public String getAllProductsPriceInCart(int customerId) {
         Authentication auth = getAuth();
-        if(!auth.getName().equals(shoppingCartRepository.getCustomerNameById(customerId))) { // ZATEN CUSTOMER REPOSİTORYDE VAR AYRI QUERY YAZILMASI GEREKLİ DEĞİL
+        if(!auth.getName().equals(customerRepository.findById(customerId).get().getUsername())) { // ZATEN CUSTOMER REPOSİTORYDE VAR AYRI QUERY YAZILMASI GEREKLİ DEĞİL
             logger.error("Bu sepet kaydı " + auth.getName() + " müşterisine ait değildir!");
             throw new AccessDeniedException("Kullanıcı sadece kendi verilerine erişebilir!");
         }
