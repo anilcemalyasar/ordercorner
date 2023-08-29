@@ -1,5 +1,6 @@
 package com.btk.ordercorner.controller;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,12 +12,14 @@ import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.vm.AddProductVm;
 import com.btk.ordercorner.model.vm.UpdateProductStockVm;
 import com.btk.ordercorner.service.ProductService;
+import com.btk.ordercorner.service.ReportService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import net.sf.jasperreports.engine.JRException;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,6 +28,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -36,10 +41,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class ProductController {
     
     private ProductService productService;
+    private ReportService reportService;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ReportService reportService) {
         this.productService = productService;
+        this.reportService = reportService;
     }
 
     @Operation(
@@ -197,5 +204,11 @@ public class ProductController {
     public String updateProductStock(@Valid @RequestBody UpdateProductStockVm productStockVm) {
         return productService.updateProductStock(productStockVm);
     }
+
+    @GetMapping(value="/report/{format}")
+    public String generateReport(@PathVariable("format") String format) throws FileNotFoundException, JRException {
+        return reportService.exportReportProduct(format);
+    }
+    
 
 }

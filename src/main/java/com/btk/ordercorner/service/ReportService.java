@@ -1,7 +1,11 @@
 package com.btk.ordercorner.service;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -9,18 +13,75 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
+import com.btk.ordercorner.model.entity.Category;
 import com.btk.ordercorner.model.entity.Product;
+import com.btk.ordercorner.repository.CategoryRepository;
 import com.btk.ordercorner.repository.ProductRepository;
 
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 @Service
 public class ReportService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    public String exportReportCategory(String reportFormat) throws FileNotFoundException, JRException {
+        List<Category> categories = categoryRepository.findAll();
+        // Load file and compile it
+        String path = "C:\\Users\\msi\\Desktop";
+        File file = ResourceUtils.getFile("classpath:categories.jrxml");
+        JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(categories);
+        Map<String, Object> map = new HashMap<>();
+        map.put("Shown to", "Admin");
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, map, dataSource);
+    
+        if(reportFormat.equalsIgnoreCase("html")) {
+            JasperExportManager.exportReportToHtmlFile(jasperPrint, path + "\\categories.html");
+        }
+        if(reportFormat.equalsIgnoreCase("pdf")) {
+            JasperExportManager.exportReportToPdfFile(jasperPrint, path + "\\categories.pdf");
+        }
+
+        return "report generated in path : " + path;
+    }
+
+    public String exportReportProduct(String reportFormat) throws FileNotFoundException, JRException {
+        List<Product> products = productRepository.findAll();
+        // Load file and compile it
+        String path = "C:\\Users\\msi\\Desktop";
+        File file = ResourceUtils.getFile("classpath:products.jrxml");
+        JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(products);
+        Map<String, Object> map = new HashMap<>();
+        map.put("Shown to", "Admin");
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, map, dataSource);
+    
+        if(reportFormat.equalsIgnoreCase("html")) {
+            JasperExportManager.exportReportToHtmlFile(jasperPrint, path + "\\products.html");
+        }
+        if(reportFormat.equalsIgnoreCase("pdf")) {
+            JasperExportManager.exportReportToPdfFile(jasperPrint, path + "\\products.pdf");
+        }
+
+        return "report generated in path : " + path;
+    }
+
+
 
     public void generateExcel(HttpServletResponse response) throws IOException {
         // Ürünleri veritabanından aldık

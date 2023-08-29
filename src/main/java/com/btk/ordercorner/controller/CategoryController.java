@@ -1,5 +1,6 @@
 package com.btk.ordercorner.controller;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,13 +16,18 @@ import com.btk.ordercorner.model.dto.CategoryDto;
 import com.btk.ordercorner.model.vm.AddCategoryVm;
 import com.btk.ordercorner.model.vm.UpdateCategoryVm;
 import com.btk.ordercorner.service.CategoryService;
+import com.btk.ordercorner.service.ReportService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import net.sf.jasperreports.engine.JRException;
+
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @RestController
@@ -31,10 +37,18 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class CategoryController {
 
     private CategoryService categoryService;
+    private ReportService reportService;
 
-    public CategoryController(CategoryService categoryService) {
+    public CategoryController(CategoryService categoryService, ReportService reportService) {
         this.categoryService = categoryService;
+        this.reportService = reportService;
     }
+
+    @GetMapping(value="/report/{format}")
+    public String generateReport(@PathVariable("format") String format) throws FileNotFoundException, JRException {
+        return reportService.exportReportCategory(format);
+    }
+    
 
     @GetMapping(value="all")
     @Operation(
