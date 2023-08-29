@@ -16,8 +16,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ResourceUtils;
 
 import com.btk.ordercorner.model.entity.Category;
+import com.btk.ordercorner.model.entity.Customer;
 import com.btk.ordercorner.model.entity.Product;
 import com.btk.ordercorner.repository.CategoryRepository;
+import com.btk.ordercorner.repository.CustomerRepository;
 import com.btk.ordercorner.repository.ProductRepository;
 
 import jakarta.servlet.ServletOutputStream;
@@ -38,6 +40,9 @@ public class ReportService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
 
     public String exportReportCategory(String reportFormat) throws FileNotFoundException, JRException {
         List<Category> categories = categoryRepository.findAll();
@@ -76,6 +81,27 @@ public class ReportService {
         }
         if(reportFormat.equalsIgnoreCase("pdf")) {
             JasperExportManager.exportReportToPdfFile(jasperPrint, path + "\\products.pdf");
+        }
+
+        return "report generated in path : " + path;
+    }
+
+    public String exportReportCustomer(String reportFormat) throws FileNotFoundException, JRException {
+        List<Customer> customers = customerRepository.findAll();
+        // Load file and compile it
+        String path = "C:\\Users\\msi\\Desktop";
+        File file = ResourceUtils.getFile("classpath:customers.jrxml");
+        JasperReport jasperReport = JasperCompileManager.compileReport(file.getAbsolutePath());
+        JRBeanCollectionDataSource dataSource = new JRBeanCollectionDataSource(customers);
+        Map<String, Object> map = new HashMap<>();
+        map.put("Shown to", "Admin");
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, map, dataSource);
+    
+        if(reportFormat.equalsIgnoreCase("html")) {
+            JasperExportManager.exportReportToHtmlFile(jasperPrint, path + "\\customers.html");
+        }
+        if(reportFormat.equalsIgnoreCase("pdf")) {
+            JasperExportManager.exportReportToPdfFile(jasperPrint, path + "\\customers.pdf");
         }
 
         return "report generated in path : " + path;

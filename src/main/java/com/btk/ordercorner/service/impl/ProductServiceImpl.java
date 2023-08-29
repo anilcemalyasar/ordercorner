@@ -95,7 +95,7 @@ public class ProductServiceImpl implements ProductService {
         ProductDto productDto = modelMapperManager.forResponse().map(productVm, ProductDto.class);
         Product realProduct = modelMapperManager.forRequest().map(productDto, Product.class);
         productRepository.save(realProduct);
-        String message = auth.getName() + " isimli admin " + realProduct.getProductId() + " ID numaralı " + realProduct.getProductName() + " isimli ürünü sildi!";
+        String message = auth.getName() + " isimli admin " + realProduct.getProductId() + " ID numaralı " + realProduct.getProductName() + " isimli ürünü ekledi!";
         logger.info(message);
         return realProduct.getProductId();
     }

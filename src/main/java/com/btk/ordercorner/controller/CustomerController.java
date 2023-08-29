@@ -8,13 +8,16 @@ import com.btk.ordercorner.model.vm.AddCustomerVm;
 import com.btk.ordercorner.model.vm.UpdatePasswordVm;
 import com.btk.ordercorner.model.vm.UpdateWalletVm;
 import com.btk.ordercorner.service.CustomerService;
+import com.btk.ordercorner.service.ReportService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import net.sf.jasperreports.engine.JRException;
 
+import java.io.FileNotFoundException;
 import java.util.List;
 
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,9 +39,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class CustomerController {
     
     private CustomerService customerService;
+    private ReportService reportService;
 
-    public CustomerController(CustomerService customerService) {
+    public CustomerController(CustomerService customerService, ReportService reportService) {
         this.customerService = customerService;
+        this.reportService = reportService;
     }
 
     @Operation(
@@ -208,5 +213,12 @@ public class CustomerController {
     public String updatePasswordByCustomerId(@Valid @RequestBody UpdatePasswordVm passwordVm) {
         return customerService.updatePassword(passwordVm);
     }
+
+    @GetMapping(value="/report/{format}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public String generateReport(@PathVariable("format") String format) throws FileNotFoundException, JRException {
+        return reportService.exportReportCustomer(format);
+    }
+    
 
 }
