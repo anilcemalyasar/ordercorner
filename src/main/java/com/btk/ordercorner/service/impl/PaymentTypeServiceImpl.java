@@ -9,6 +9,7 @@ import com.btk.ordercorner.model.dto.PaymentTypeDto;
 import com.btk.ordercorner.model.entity.PaymentType;
 import com.btk.ordercorner.model.vm.AddPaymentTypeVm;
 import com.btk.ordercorner.model.vm.GetPaymentTypeVm;
+import com.btk.ordercorner.model.vm.UpdatePaymentTypeVm;
 import com.btk.ordercorner.repository.PaymentTypeRepository;
 import com.btk.ordercorner.service.PaymentTypeService;
 import com.btk.ordercorner.util.mapper.ModelMapperManager;
@@ -44,6 +45,14 @@ public class PaymentTypeServiceImpl implements PaymentTypeService {
         PaymentTypeDto paymentTypeDto = this.modelMapperManager.forResponse().map(addPaymentTypeVm, PaymentTypeDto.class);
         PaymentType paymentType = this.modelMapperManager.forRequest().map(paymentTypeDto, PaymentType.class);
         paymentTypeRepository.save(paymentType);
+    }
+
+    @Override
+    public String updatePaymentType(UpdatePaymentTypeVm updatePaymentTypeVm) {
+        PaymentType paymentType = paymentTypeRepository.findById(updatePaymentTypeVm.getPaymentId()).get();
+        paymentType.setPaymentName(updatePaymentTypeVm.getPaymentName());
+        paymentTypeRepository.save(paymentType);
+        return paymentType.getPaymentId() + " ID li ödeme yöntemi " + paymentType.getPaymentName() + " yöntemine güncellendi!";
     }
     
 }
