@@ -134,5 +134,13 @@ public class CustomerServiceImpl implements CustomerService {
         return "Sayın " + customer.getCustomerFirstName() + " " + customer.getCustomerLastName() + " şifreniz güncellenmiştir!";
     }
 
-    
+    // Mock Data ile Test için eklenen metotlar!
+    public List<Customer> findAllCustomers() {
+        return customerRepository.findAll();
+    }
+
+    public Customer getById(int id) {
+        return customerRepository.findById(id).get();
+    }
+
 }

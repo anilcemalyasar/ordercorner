@@ -1,4 +1,4 @@
-package com.btk.ordercorner;
+package com.btk.ordercorner.customer;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -13,12 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
 import com.btk.ordercorner.controller.CustomerController;
 import com.btk.ordercorner.model.dto.CustomerDto;
-import com.btk.ordercorner.repository.CustomerRepository;
 import com.btk.ordercorner.service.CustomerService;
 
 @ExtendWith(MockitoExtension.class)
