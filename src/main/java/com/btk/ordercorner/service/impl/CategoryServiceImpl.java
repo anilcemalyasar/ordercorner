@@ -115,5 +115,14 @@ public class CategoryServiceImpl implements CategoryService {
         return message;
     }
 
+    // mock data ile testler için yazılmış metotlar
+    public List<Category> findAllCategories() {
+        return categoryRepository.findAll();
+    }
+
+    public Category findById(int id) {
+        return categoryRepository.findById(id).get();
+    }
+
 
 }
