@@ -23,12 +23,10 @@ import net.sf.jasperreports.engine.JRException;
 
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 
@@ -204,6 +202,12 @@ public class ProductController {
     public String updateProductStock(@Valid @RequestBody UpdateProductStockVm productStockVm) {
         return productService.updateProductStock(productStockVm);
     }
+
+    @GetMapping(value="/product/search/{productName}")
+    public ProductDto searchProductByProductName(@PathVariable("productName") String productName) {
+        return productService.searchProductByName(productName);
+    }
+    
 
     @GetMapping(value="/report/{format}")
     public String generateReport(@PathVariable("format") String format) throws FileNotFoundException, JRException {

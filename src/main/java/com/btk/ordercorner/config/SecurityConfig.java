@@ -29,7 +29,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/products/all", "/api/carts/{cartId}","/api/products/{productId}", "/api/customers/add",
+                .requestMatchers("/api/products/all", "/api/carts/{cartId}","/api/products/{productId}", "/api/customers/add", "/api/products/product/search/{productName}",
                 "/api/categories/all", "/api/categories/{categoryId}", "/api/products/search/{categoryName}", "/api/generate-excel-report", "/api/carts/customers/{customerId}"
                 , "/api/orders/add", "/swagger-ui/index.html", "/swagger-ui/**","/v3/api-docs/**","/api/payments/",
                 "/api/cartproducts/{cartId}/{productId}/{productQuantity}", "/api/cartproducts/{cartId}/{productId}", "/api/categories/report", "/api/products/search/price/biggerThan/{productPrice}",
