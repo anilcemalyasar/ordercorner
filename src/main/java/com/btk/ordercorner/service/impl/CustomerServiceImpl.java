@@ -21,6 +21,7 @@ import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.entity.Customer;
 import com.btk.ordercorner.model.entity.Product;
 import com.btk.ordercorner.model.vm.AddCustomerVm;
+import com.btk.ordercorner.model.vm.RemoveProductFromFavoritesVm;
 import com.btk.ordercorner.model.vm.UpdatePasswordVm;
 import com.btk.ordercorner.model.vm.UpdateWalletVm;
 import com.btk.ordercorner.repository.CustomerRepository;
@@ -180,6 +181,33 @@ public class CustomerServiceImpl implements CustomerService {
         customerRepository.save(customer);
         return customer.getCustomerFirstName() + " adlı müşteri favorilerine " 
             + product.getProductName() + " ürününü ekledi!";
+    }
+
+    @Override
+    public String removeProductFromFavorites(int customerId, RemoveProductFromFavoritesVm productVm) {
+        if(!existsById(customerId)) {
+            String errorMessage = customerId + " ID numarasına sahip bir kullanıcı bulunmamaktadır!";
+            logger.error(errorMessage);
+            throw new CustomerNotFoundException(errorMessage);
+        }
+
+        Authentication auth = getAuth();
+        Customer customer = customerRepository.findById(customerId).get();
+        String username = customer.getUsername();
+        if(!auth.getName().equals(username)) {
+            logger.error("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
+            throw new NotFoundException("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
+        }
+
+        Product product = productRepository.findByProductNameIgnoreCase(productVm.getProductName());
+        List<Product> favProducts = customer.getFavoriteProducts();
+        favProducts.remove(product);
+        // Update favorite products of customer after removing given product
+        customer.setFavoriteProducts(favProducts);
+        customerRepository.save(customer);
+        return customer.getCustomerFirstName() + " adlı müşteri favorilerinden " 
+            + product.getProductName() + " ürününü çıkardı!";
+
     }
 
 }

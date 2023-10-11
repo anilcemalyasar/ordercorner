@@ -7,6 +7,7 @@ import com.btk.ordercorner.model.dto.CustomerDto;
 import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.entity.Product;
 import com.btk.ordercorner.model.vm.AddCustomerVm;
+import com.btk.ordercorner.model.vm.RemoveProductFromFavoritesVm;
 import com.btk.ordercorner.model.vm.UpdatePasswordVm;
 import com.btk.ordercorner.model.vm.UpdateWalletVm;
 import com.btk.ordercorner.service.CustomerService;
@@ -210,8 +211,6 @@ public class CustomerController {
             )
         }
     )
-
-
     @PutMapping(value="/changePassword")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public String updatePasswordByCustomerId(@Valid @RequestBody UpdatePasswordVm passwordVm) {
@@ -224,6 +223,10 @@ public class CustomerController {
         return reportService.exportReportCustomer(format);
     }
 
+    @Operation(
+        summary = "Bu metod, sistemde {customerId} numaralı müşterinin favorilediği ürünleri görmesine olanak sağlar.",
+        description = "Bu metod, ortak tablo olarak birleştirilen musteri_favori_urunler tablosundan id numarası verilmiş müşterinin favorilediği ürünleri bir liste olarak görmesini sağlar."
+    )
     @GetMapping(value="/{customerId}/products/favorites")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public List<ProductDto> getFavoriteProductsOfCustomer(@PathVariable("customerId") int customerId) {
@@ -231,11 +234,44 @@ public class CustomerController {
     }
 
 
+    @Operation(
+        description = "Bu metod, sistemde {customerId} numaralı müşterinin favorilerine ürün eklemesine olanak sağlar",
+        summary = "Bu metod, sistemde {customerId} numaralı müşterinin favorilerine ürün eklemesine olanak sağlar",
+        responses = {
+            @ApiResponse(
+                description = "Başarılı",
+                responseCode = "200"
+            ),
+            @ApiResponse(
+                description = "Geçersiz istek",
+                responseCode = "400"
+            ),
+            @ApiResponse(
+                description = "Yetkisiz işlem",
+                responseCode = "403"
+            ),
+            @ApiResponse(
+                description = "Bulunamadı",
+                responseCode = "404"
+            )
+        }
+    )
     @PostMapping(value="/{customerId}/favorites/products/{productId}/add")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public String addProductToFavorites(@PathVariable("customerId") int customerId,
                                         @PathVariable("productId") int productId) {
         return customerService.addProductToFavorites(customerId, productId);
+    }
+
+    @Operation(
+        description = "Bu metod, sistemde {customerId} numaralı müşterinin favorilediği ürünü listeden kaldırmasına olanak sağlar",
+        summary = "Bu metod, sistemde {customerId} numaralı müşterinin favorilediği ürünü listeden kaldırmasına olanak sağlar"
+    )
+    @DeleteMapping(value="/{customerId}/favorites/products/remove")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public String removeProductFromFavorites(@PathVariable("customerId") int customerId, 
+                                    @Valid @RequestBody RemoveProductFromFavoritesVm productVm) {
+        return customerService.removeProductFromFavorites(customerId, productVm);
     }
     
 
