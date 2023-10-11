@@ -1,12 +1,20 @@
 package com.btk.ordercorner.model.entity;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
+import org.apache.commons.lang3.builder.ToStringExclude;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Size;
@@ -51,5 +59,13 @@ public class Customer {
 
     @OneToMany(mappedBy = "customer")
     private List<Order> orders;
+
+    @ManyToMany
+    @JoinTable(
+        name = "kullanici_favori_urunler",
+        joinColumns = @JoinColumn(name = "musteri_id"),
+        inverseJoinColumns = @JoinColumn(name = "urun_id")
+    )
+    List<Product> favoriteProducts;
 
 }

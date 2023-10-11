@@ -17,11 +17,14 @@ import com.btk.ordercorner.exception.NotFoundException;
 import com.btk.ordercorner.exception.customer.CustomerAlreadyExistsException;
 import com.btk.ordercorner.exception.customer.CustomerNotFoundException;
 import com.btk.ordercorner.model.dto.CustomerDto;
+import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.entity.Customer;
+import com.btk.ordercorner.model.entity.Product;
 import com.btk.ordercorner.model.vm.AddCustomerVm;
 import com.btk.ordercorner.model.vm.UpdatePasswordVm;
 import com.btk.ordercorner.model.vm.UpdateWalletVm;
 import com.btk.ordercorner.repository.CustomerRepository;
+import com.btk.ordercorner.repository.ProductRepository;
 import com.btk.ordercorner.service.CustomerService;
 import com.btk.ordercorner.util.mapper.ModelMapperManager;
 
@@ -30,14 +33,16 @@ public class CustomerServiceImpl implements CustomerService {
     
     private CustomerRepository customerRepository;
     private ModelMapperManager modelMapperManager;
+    private ProductRepository productRepository;
     private static final Logger logger = LoggerFactory.getLogger(CustomerServiceImpl.class);
     private PasswordEncoder passwordEncoder;
 
     public CustomerServiceImpl(CustomerRepository customerRepository, ModelMapperManager modelMapperManager
-    ,PasswordEncoder passwordEncoder) {
+    ,PasswordEncoder passwordEncoder, ProductRepository productRepository) {
         this.customerRepository = customerRepository;
         this.modelMapperManager = modelMapperManager;
         this.passwordEncoder = passwordEncoder;
+        this.productRepository = productRepository;
     }
 
     @Cacheable(value = "customers")
@@ -141,6 +146,40 @@ public class CustomerServiceImpl implements CustomerService {
 
     public Customer getById(int id) {
         return customerRepository.findById(id).get();
+    }
+
+    @Override
+    public List<ProductDto> getFavoriteProductsOfCustomer(int customerId) {
+        Authentication auth = getAuth();
+        Customer customer = customerRepository.findById(customerId).get();
+        String username = customer.getUsername();
+        if(!auth.getName().equals(username)) {
+            logger.error("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
+            throw new NotFoundException("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
+        }
+
+        List<ProductDto> favProducts = customer.getFavoriteProducts()
+                                    .stream()
+                                .map(product -> modelMapperManager.forResponse().map(product, ProductDto.class))
+                                    .collect(Collectors.toList());
+        return favProducts;
+    }
+
+    @Override
+    public String addProductToFavorites(int customerId, int productId) {
+        if(!existsById(customerId)) {
+            String errorMessage = customerId + " ID numarasına sahip bir kullanıcı bulunmamaktadır!";
+            logger.error(errorMessage);
+            throw new CustomerNotFoundException(errorMessage);
+        }
+        Customer customer = customerRepository.findById(customerId).get();
+        List<Product> favProducts = customer.getFavoriteProducts();
+        Product product = productRepository.findById(productId).get();
+        favProducts.add(product);
+        customer.setFavoriteProducts(favProducts);
+        customerRepository.save(customer);
+        return customer.getCustomerFirstName() + " adlı müşteri favorilerine " 
+            + product.getProductName() + " ürününü ekledi!";
     }
 
 }

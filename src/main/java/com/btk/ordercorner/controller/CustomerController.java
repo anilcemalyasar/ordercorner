@@ -4,6 +4,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.btk.ordercorner.model.dto.CustomerDto;
+import com.btk.ordercorner.model.dto.ProductDto;
+import com.btk.ordercorner.model.entity.Product;
 import com.btk.ordercorner.model.vm.AddCustomerVm;
 import com.btk.ordercorner.model.vm.UpdatePasswordVm;
 import com.btk.ordercorner.model.vm.UpdateWalletVm;
@@ -208,6 +210,8 @@ public class CustomerController {
             )
         }
     )
+
+
     @PutMapping(value="/changePassword")
     @PreAuthorize("hasAuthority('ROLE_USER')")
     public String updatePasswordByCustomerId(@Valid @RequestBody UpdatePasswordVm passwordVm) {
@@ -218,6 +222,20 @@ public class CustomerController {
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public String generateReport(@PathVariable("format") String format) throws FileNotFoundException, JRException {
         return reportService.exportReportCustomer(format);
+    }
+
+    @GetMapping(value="/{customerId}/products/favorites")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public List<ProductDto> getFavoriteProductsOfCustomer(@PathVariable("customerId") int customerId) {
+        return customerService.getFavoriteProductsOfCustomer(customerId);
+    }
+
+
+    @PostMapping(value="/{customerId}/favorites/products/{productId}/add")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public String addProductToFavorites(@PathVariable("customerId") int customerId,
+                                        @PathVariable("productId") int productId) {
+        return customerService.addProductToFavorites(customerId, productId);
     }
     
 

@@ -1,7 +1,9 @@
 package com.btk.ordercorner.model.entity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -56,4 +58,7 @@ public class Product {
     )
     private List<CartProducts> carts = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "favoriteProducts")
+    List<Customer> customers;
+    
 }
