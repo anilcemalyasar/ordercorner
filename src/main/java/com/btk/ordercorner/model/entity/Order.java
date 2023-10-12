@@ -2,6 +2,7 @@ package com.btk.ordercorner.model.entity;
 
 import java.sql.Date;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -48,5 +49,9 @@ public class Order {
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "fk_sepet_id", referencedColumnName = "sepet_id")
     private ShoppingCart cart;
+
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "fk_teslimat_id", referencedColumnName = "teslimat_id")
+    private Delivery delivery;
 
 }

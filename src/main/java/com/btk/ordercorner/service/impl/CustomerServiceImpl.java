@@ -16,14 +16,17 @@ import org.springframework.stereotype.Service;
 import com.btk.ordercorner.exception.NotFoundException;
 import com.btk.ordercorner.exception.customer.CustomerAlreadyExistsException;
 import com.btk.ordercorner.exception.customer.CustomerNotFoundException;
+import com.btk.ordercorner.model.dto.AddressDto;
 import com.btk.ordercorner.model.dto.CustomerDto;
 import com.btk.ordercorner.model.dto.ProductDto;
+import com.btk.ordercorner.model.entity.Address;
 import com.btk.ordercorner.model.entity.Customer;
 import com.btk.ordercorner.model.entity.Product;
 import com.btk.ordercorner.model.vm.AddCustomerVm;
 import com.btk.ordercorner.model.vm.RemoveProductFromFavoritesVm;
 import com.btk.ordercorner.model.vm.UpdatePasswordVm;
 import com.btk.ordercorner.model.vm.UpdateWalletVm;
+import com.btk.ordercorner.repository.AddressRepository;
 import com.btk.ordercorner.repository.CustomerRepository;
 import com.btk.ordercorner.repository.ProductRepository;
 import com.btk.ordercorner.service.CustomerService;
@@ -35,15 +38,17 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerRepository customerRepository;
     private ModelMapperManager modelMapperManager;
     private ProductRepository productRepository;
+    private AddressRepository addressRepository;
     private static final Logger logger = LoggerFactory.getLogger(CustomerServiceImpl.class);
     private PasswordEncoder passwordEncoder;
 
     public CustomerServiceImpl(CustomerRepository customerRepository, ModelMapperManager modelMapperManager
-    ,PasswordEncoder passwordEncoder, ProductRepository productRepository) {
+    ,PasswordEncoder passwordEncoder, ProductRepository productRepository, AddressRepository addressRepository) {
         this.customerRepository = customerRepository;
         this.modelMapperManager = modelMapperManager;
         this.passwordEncoder = passwordEncoder;
         this.productRepository = productRepository;
+        this.addressRepository = addressRepository;
     }
 
     @Cacheable(value = "customers")
@@ -209,5 +214,22 @@ public class CustomerServiceImpl implements CustomerService {
             + product.getProductName() + " ürününü çıkardı!";
 
     }
+
+    // Buraya authentication koy
+    @Override
+    public List<AddressDto> getAllAddressesByCustomerId(int customerId) {
+        if(!existsById(customerId)) {
+            String errorMessage = customerId + " ID numarasına sahip bir kullanıcı bulunmamaktadır!";
+            logger.error(errorMessage);
+            throw new CustomerNotFoundException(errorMessage);
+        } 
+        List<Address> addresses = customerRepository.findById(customerId).get()
+                                    .getAddresses();
+        return addresses.stream()
+            .map(address -> modelMapperManager.forResponse().map(address, AddressDto.class))
+            .collect(Collectors.toList());
+    }
+
+    // müşteri adres ekleyebilsin, adres silebilsin
 
 }

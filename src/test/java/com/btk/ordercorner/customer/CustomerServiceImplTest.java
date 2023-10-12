@@ -34,11 +34,11 @@ public class CustomerServiceImplTest {
         Customer customer1 = new Customer(
             1, "Anıl", "Yaşar", 
             "anl7", "anl7@gmail.com", "777", 
-            100, "ROLE_USER", new ArrayList<Order>(), null);
+            100, "ROLE_USER", new ArrayList<Order>(), null, null);
         Customer customer2 = new Customer(
             2, "Aşkın", "Yaşar", 
             "askin", "askin@gmail.com", "10", 
-            100000, "ROLE_USER", new ArrayList<Order>(), null);
+            100000, "ROLE_USER", new ArrayList<Order>(), null, null);
 
         customers.add(customer1);
         customers.add(customer2);
@@ -58,7 +58,7 @@ public class CustomerServiceImplTest {
         Customer customer1 = new Customer(
             1, "Anıl", "Yaşar", 
             "anl7", "anl7@gmail.com", "777", 
-            100, "ROLE_USER", new ArrayList<Order>(), null);
+            100, "ROLE_USER", new ArrayList<Order>(), null, null);
 
         Optional<Customer> optional = Optional.of(customer1);
 

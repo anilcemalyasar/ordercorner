@@ -68,4 +68,12 @@ public class Customer {
     )
     List<Product> favoriteProducts;
 
+    @ManyToMany
+    @JoinTable(
+        name = "musteriler_adresler",
+        joinColumns = @JoinColumn(name = "musteri_id"),
+        inverseJoinColumns = @JoinColumn(name = "adres_id")
+    )
+    List<Address> addresses;
+
 }

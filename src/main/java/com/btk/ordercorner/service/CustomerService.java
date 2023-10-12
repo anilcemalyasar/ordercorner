@@ -2,6 +2,7 @@ package com.btk.ordercorner.service;
 
 import java.util.List;
 
+import com.btk.ordercorner.model.dto.AddressDto;
 import com.btk.ordercorner.model.dto.CustomerDto;
 import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.vm.AddCustomerVm;
@@ -21,4 +22,5 @@ public interface CustomerService {
     List<ProductDto> getFavoriteProductsOfCustomer(int customerId);
     String addProductToFavorites(int customerId, int productId);
     String removeProductFromFavorites(int customerId, RemoveProductFromFavoritesVm productVm);
+    List<AddressDto> getAllAddressesByCustomerId(int customerId);
 }
