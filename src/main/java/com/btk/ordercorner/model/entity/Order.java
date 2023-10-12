@@ -54,4 +54,8 @@ public class Order {
     @JoinColumn(name = "fk_teslimat_id", referencedColumnName = "teslimat_id")
     private Delivery delivery;
 
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "fk_adres_id", referencedColumnName = "adres_id")
+    private Address address;
+
 }

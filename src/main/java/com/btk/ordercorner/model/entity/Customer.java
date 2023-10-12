@@ -74,6 +74,6 @@ public class Customer {
         joinColumns = @JoinColumn(name = "musteri_id"),
         inverseJoinColumns = @JoinColumn(name = "adres_id")
     )
-    List<Address> addresses;
+    private List<Address> addresses = new ArrayList<Address>();
 
 }

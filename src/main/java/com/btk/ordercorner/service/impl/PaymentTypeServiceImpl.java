@@ -42,7 +42,7 @@ public class PaymentTypeServiceImpl implements PaymentTypeService {
 
     @Override
     public void addPaymentTypeVm(AddPaymentTypeVm addPaymentTypeVm) {
-        PaymentTypeDto paymentTypeDto = this.modelMapperManager.forResponse().map(addPaymentTypeVm, PaymentTypeDto.class);
+        PaymentTypeDto paymentTypeDto = this.modelMapperManager.forRequest().map(addPaymentTypeVm, PaymentTypeDto.class);
         PaymentType paymentType = this.modelMapperManager.forRequest().map(paymentTypeDto, PaymentType.class);
         paymentTypeRepository.save(paymentType);
     }

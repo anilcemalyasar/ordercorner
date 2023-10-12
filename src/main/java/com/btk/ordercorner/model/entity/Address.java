@@ -1,9 +1,12 @@
 package com.btk.ordercorner.model.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -48,11 +51,11 @@ public class Address {
     @Size(max = 50)
     private String buildingName;
 
-    @ManyToMany(mappedBy = "addresses")
-    private List<Customer> customers;
+    @ManyToMany(mappedBy = "addresses", cascade = CascadeType.ALL)
+    private List<Customer> customers = new ArrayList<Customer>();
 
     @OneToOne(mappedBy = "address")
-    private Delivery delivery;
+    private Order order;
 
     @Override
     public String toString() {

@@ -13,6 +13,9 @@ public class AddressDto {
 
     @NotNull
     private int addressId;
+
+    @NotNull
+    private int orderId;
     
     @NotBlank
     private String city;
@@ -28,5 +31,6 @@ public class AddressDto {
 
     @NotNull
     private int buildingNumber;
+
 
 }

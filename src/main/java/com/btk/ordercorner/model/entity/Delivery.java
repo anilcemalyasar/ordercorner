@@ -2,6 +2,7 @@ package com.btk.ordercorner.model.entity;
 
 import com.btk.ordercorner.model.enums.DeliveryStatus;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -40,8 +41,5 @@ public class Delivery {
     @OneToOne(mappedBy = "delivery")
     private Order order;
 
-    @OneToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "fk_adres_id", referencedColumnName = "adres_id")
-    private Address address;
 
 }

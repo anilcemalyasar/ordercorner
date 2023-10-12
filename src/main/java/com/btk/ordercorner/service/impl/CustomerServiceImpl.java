@@ -3,11 +3,13 @@ package com.btk.ordercorner.service.impl;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,15 +24,19 @@ import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.entity.Address;
 import com.btk.ordercorner.model.entity.Customer;
 import com.btk.ordercorner.model.entity.Product;
+import com.btk.ordercorner.model.vm.AddAddressVm;
 import com.btk.ordercorner.model.vm.AddCustomerVm;
 import com.btk.ordercorner.model.vm.RemoveProductFromFavoritesVm;
 import com.btk.ordercorner.model.vm.UpdatePasswordVm;
 import com.btk.ordercorner.model.vm.UpdateWalletVm;
 import com.btk.ordercorner.repository.AddressRepository;
 import com.btk.ordercorner.repository.CustomerRepository;
+import com.btk.ordercorner.repository.OrderRepository;
 import com.btk.ordercorner.repository.ProductRepository;
 import com.btk.ordercorner.service.CustomerService;
 import com.btk.ordercorner.util.mapper.ModelMapperManager;
+
+import jakarta.transaction.Transactional;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -39,16 +45,19 @@ public class CustomerServiceImpl implements CustomerService {
     private ModelMapperManager modelMapperManager;
     private ProductRepository productRepository;
     private AddressRepository addressRepository;
+    private OrderRepository orderRepository;
     private static final Logger logger = LoggerFactory.getLogger(CustomerServiceImpl.class);
     private PasswordEncoder passwordEncoder;
 
     public CustomerServiceImpl(CustomerRepository customerRepository, ModelMapperManager modelMapperManager
-    ,PasswordEncoder passwordEncoder, ProductRepository productRepository, AddressRepository addressRepository) {
+    ,PasswordEncoder passwordEncoder, ProductRepository productRepository, AddressRepository addressRepository,
+    OrderRepository orderRepository) {
         this.customerRepository = customerRepository;
         this.modelMapperManager = modelMapperManager;
         this.passwordEncoder = passwordEncoder;
         this.productRepository = productRepository;
         this.addressRepository = addressRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Cacheable(value = "customers")
@@ -96,11 +105,7 @@ public class CustomerServiceImpl implements CustomerService {
     @CacheEvict(value = "customers", key = "#customerId")
     @Override
     public String deleteByCustomerId(int customerId) {
-        if (!existsById(customerId)) {
-            String errorMessage = customerId + " ID numarasına sahip bir kullanıcı bulunmamaktadır!";
-            logger.error(errorMessage);
-            throw new CustomerNotFoundException(errorMessage);
-        }
+        checkIfExists(customerId);
         Customer customer = customerRepository.findById(customerId).orElseThrow();
         customerRepository.deleteById(customerId);
         return customer.getCustomerFirstName() + " " + customer.getCustomerLastName()
@@ -127,13 +132,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     private Customer getCustomerById(int customerId) {
-        Authentication auth = getAuth();
-        String username = customerRepository.findById(customerId).get().getUsername();
-        if(!auth.getName().equals(username)) {
-            logger.error("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
-            throw new NotFoundException("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
-        }
-        Customer customer = customerRepository.findById(customerId).get();
+        Customer customer = checkAuthentication(customerId);
         return customer;
     }
 
@@ -156,14 +155,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public List<ProductDto> getFavoriteProductsOfCustomer(int customerId) {
-        Authentication auth = getAuth();
-        Customer customer = customerRepository.findById(customerId).get();
-        String username = customer.getUsername();
-        if(!auth.getName().equals(username)) {
-            logger.error("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
-            throw new NotFoundException("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
-        }
-
+        Customer customer = checkAuthentication(customerId);;
         List<ProductDto> favProducts = customer.getFavoriteProducts()
                                     .stream()
                                 .map(product -> modelMapperManager.forResponse().map(product, ProductDto.class))
@@ -173,11 +165,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String addProductToFavorites(int customerId, int productId) {
-        if(!existsById(customerId)) {
-            String errorMessage = customerId + " ID numarasına sahip bir kullanıcı bulunmamaktadır!";
-            logger.error(errorMessage);
-            throw new CustomerNotFoundException(errorMessage);
-        }
+        checkIfExists(customerId);
         Customer customer = customerRepository.findById(customerId).get();
         List<Product> favProducts = customer.getFavoriteProducts();
         Product product = productRepository.findById(productId).get();
@@ -190,19 +178,9 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public String removeProductFromFavorites(int customerId, RemoveProductFromFavoritesVm productVm) {
-        if(!existsById(customerId)) {
-            String errorMessage = customerId + " ID numarasına sahip bir kullanıcı bulunmamaktadır!";
-            logger.error(errorMessage);
-            throw new CustomerNotFoundException(errorMessage);
-        }
+        checkIfExists(customerId);
 
-        Authentication auth = getAuth();
-        Customer customer = customerRepository.findById(customerId).get();
-        String username = customer.getUsername();
-        if(!auth.getName().equals(username)) {
-            logger.error("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
-            throw new NotFoundException("Başka kullanıcının bilgilerine erişim hakkınız yoktur!");
-        }
+        Customer customer = checkAuthentication(customerId);
 
         Product product = productRepository.findByProductNameIgnoreCase(productVm.getProductName());
         List<Product> favProducts = customer.getFavoriteProducts();
@@ -218,18 +196,63 @@ public class CustomerServiceImpl implements CustomerService {
     // Buraya authentication koy
     @Override
     public List<AddressDto> getAllAddressesByCustomerId(int customerId) {
-        if(!existsById(customerId)) {
-            String errorMessage = customerId + " ID numarasına sahip bir kullanıcı bulunmamaktadır!";
-            logger.error(errorMessage);
-            throw new CustomerNotFoundException(errorMessage);
-        } 
-        List<Address> addresses = customerRepository.findById(customerId).get()
-                                    .getAddresses();
+        checkIfExists(customerId); 
+
+        Customer customer = checkAuthentication(customerId);
+        List<Address> addresses = customer.getAddresses();
         return addresses.stream()
             .map(address -> modelMapperManager.forResponse().map(address, AddressDto.class))
             .collect(Collectors.toList());
     }
 
-    // müşteri adres ekleyebilsin, adres silebilsin
+    private void checkIfExists(int customerId) {
+        if(!existsById(customerId)) {
+            String errorMessage = customerId + " ID numarasına sahip bir kullanıcı bulunmamaktadır!";
+            logger.error(errorMessage);
+            throw new CustomerNotFoundException(errorMessage);
+        }
+    }
+
+
+    private Customer checkAuthentication(int customerId) {
+        Authentication auth = getAuth();
+        Customer customer = customerRepository.findById(customerId).get();
+        if(!auth.getName().equals(customer.getUsername())) {
+            String msg = "Başka kullanıcıların adres bilgilerine erişim hakkınız yoktur!";
+            logger.error(msg);
+            throw new AccessDeniedException(msg);
+        }
+        return customer;
+    }
+
+    @Override
+    @Transactional
+    public String addAddressToCustomer(int customerId, AddAddressVm addressVm) {
+        checkIfExists(customerId);
+        Customer customer = checkAuthentication(customerId);
+
+        // Mapping View Model to Dto
+        AddressDto addressDto = modelMapperManager.forRequest().map(addressVm, AddressDto.class);
+        // Mapping Dto to Actual Entity
+        Address address = modelMapperManager.forRequest().map(addressDto, Address.class);
+        address.setOrder(orderRepository.findById(2).get());
+        // Saving new address;
+        List<Customer> customers = address.getCustomers();
+        customers.add(customer);
+        address.setCustomers(customers);
+        addressRepository.save(address);
+        
+        // Inserting new address to customer
+        List<Address> prevAddresses = customer.getAddresses();
+        prevAddresses.add(address);
+        
+        customer.setAddresses(prevAddresses);
+        customerRepository.save(customer);
+
+        return customer.getCustomerFirstName() + " " + customer.getCustomerLastName() 
+            + " isimli müşteri yeni bir adresini kaydetti";
+
+    }
+
 
 }

@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.btk.ordercorner.model.dto.CustomerDto;
 import com.btk.ordercorner.model.dto.ProductDto;
 import com.btk.ordercorner.model.entity.Product;
+import com.btk.ordercorner.model.vm.AddAddressVm;
 import com.btk.ordercorner.model.vm.AddCustomerVm;
 import com.btk.ordercorner.model.vm.RemoveProductFromFavoritesVm;
 import com.btk.ordercorner.model.vm.UpdatePasswordVm;
@@ -23,6 +24,7 @@ import net.sf.jasperreports.engine.JRException;
 import java.io.FileNotFoundException;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -273,6 +275,18 @@ public class CustomerController {
                                     @Valid @RequestBody RemoveProductFromFavoritesVm productVm) {
         return customerService.removeProductFromFavorites(customerId, productVm);
     }
+
+    @Operation(
+        description = "Bu metod, müşterinin sisteme yeni bir adresini eklemesine olanak sağlar. Oturduğu evden taşınması, iş yeri adresini kaydetmesi veya bir arkadaşının adresini ekleme gibi senaryolar için etkili bir çözüm!",
+        summary = "Bu metod, {customerId} numaralı müşterinin sisteme yeni bir adresini eklemesine yarar."
+    )
+    @PostMapping(value="/{customerId}/addresses/add")
+    @PreAuthorize("hasAuthority('ROLE_USER')")
+    public ResponseEntity<String> addAddressToCustomer(@PathVariable("customerId") int customerId,
+                                @Valid @RequestBody AddAddressVm addressVm){
+        return ResponseEntity.ok(customerService.addAddressToCustomer(customerId, addressVm));
+    }
+    
     
 
 }
