@@ -33,7 +33,8 @@ public class SecurityConfig {
                 "/api/categories/all", "/api/categories/{categoryId}", "/api/products/search/{categoryName}", "/api/generate-excel-report", "/api/carts/customers/{customerId}"
                 , "/api/orders/add", "/swagger-ui/index.html", "/swagger-ui/**","/v3/api-docs/**","/api/payments/",
                 "/api/cartproducts/{cartId}/{productId}/{productQuantity}", "/api/cartproducts/{cartId}/{productId}", "/api/categories/report", "/api/products/search/price/biggerThan/{productPrice}",
-                "/api/products/search/price/lowerThan/{productPrice}").permitAll()
+                "/api/products/search/price/lowerThan/{productPrice}", // ACTUATOR ENDPOINTS EKLENDİ
+                        "/actuator/**", "/actuator/prometheus", "/actuator/health", "/actuator/metrics").permitAll()
                 .and()
                 .authorizeHttpRequests().requestMatchers("/api/**")
                 .authenticated().and().formLogin().and().httpBasic().and().build();

@@ -12,15 +12,15 @@
 	<artifactId>ordercorner</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>ordercorner</name>
-	<description>Demo project for Spring Boot</description>
+	<description>E-Commerce Project N-Layered Architecture</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>org.springframework.boot</groupId>-->
+<!--			<artifactId>spring-boot-starter-actuator</artifactId>-->
+<!--		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -97,6 +97,36 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
+
+		<!-- Spring Boot Actuator - Metrikleri expose etmek için -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>io.micrometer</groupId>-->
+<!--			<artifactId>micrometer-core</artifactId>-->
+<!--			<version>${micrometer.version}</version>-->
+<!--		</dependency>-->
+
+		<!-- Micrometer Prometheus Registry - Prometheus formatında metrikleri export etmek için -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
+		</dependency>
+
+<!--		<dependency>-->
+<!--			<groupId>io.micrometer</groupId>-->
+<!--			<artifactId>micrometer-tracing-bridge-brave</artifactId>-->
+<!--		</dependency>-->
+
+		<!-- https://mvnrepository.com/artifact/io.micrometer/micrometer-registry-prometheus-simpleclient -->
+<!--		<dependency>-->
+<!--			<groupId>io.micrometer</groupId>-->
+<!--			<artifactId>micrometer-registry-prometheus-simpleclient</artifactId>-->
+<!--			<version>1.14.4</version>-->
+<!--		</dependency>-->
 	</dependencies>
 
 	<build>
@@ -113,6 +143,18 @@
 					</excludes>
 				</configuration>
 			</plugin>
+
+			<!-- Maven Resources Plugin - resource filtering için -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>3.3.1</version>
+				<configuration>
+					<filtering>false</filtering>
+					<encoding>UTF-8</encoding>
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
 
